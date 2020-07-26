@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false, 
-  firebaseConfig: {
+  firebase: {
     apiKey: "AIzaSyAoKHL7CNBiPTm6jGghc4Y94jSSx9o1OuA",
     authDomain: "simpletodo-410d5.firebaseapp.com",
     databaseURL: "https://simpletodo-410d5.firebaseio.com",
