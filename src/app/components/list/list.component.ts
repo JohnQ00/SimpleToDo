@@ -17,6 +17,7 @@ export class ListComponent implements OnInit {
   @Input('allowDone') allowDone: boolean;
   @Input('allowTask') allowTask: boolean;
   @Input('allowLater') allowLater: boolean;
+  loading = true;
   
   constructor(private afAuth: AngularFireAuth, private db: AngularFirestore, 
     private alertCtrl: AlertController) { }
@@ -34,7 +35,8 @@ export class ListComponent implements OnInit {
           item['id'] = a.payload.doc.id;
           this.items.push(item);
         });
-        });
+        this.loading = false;
+      });
     })
   }
 
