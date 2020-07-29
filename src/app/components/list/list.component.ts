@@ -2,7 +2,8 @@ import { Component, OnInit, Input } from '@angular/core';
 import { AlertController } from '@ionic/angular';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { AngularFirestore } from '@angular/fire/firestore';
-import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
+
+const MAX_LIST_SIZE = 100;
 
 @Component({
   selector: 'app-list',
@@ -18,7 +19,7 @@ export class ListComponent implements OnInit {
   @Input('allowTask') allowTask: boolean;
   @Input('allowLater') allowLater: boolean;
   loading = true;
-  
+
   constructor(private afAuth: AngularFireAuth, private db: AngularFirestore, 
     private alertCtrl: AlertController) { }
 
@@ -27,7 +28,9 @@ export class ListComponent implements OnInit {
       if(!user) 
         return;
       this.db.collection(`users/${(await this.afAuth.currentUser).uid}/${this.name}`, ref => {
-        return ref.orderBy('pos', 'desc');
+        let query = ref.orderBy('pos', 'desc');
+        query = query.limit(MAX_LIST_SIZE);
+        return query;
       }).snapshotChanges().subscribe(colSnap => {
         this.items = [];
         colSnap.forEach(a => {
@@ -41,46 +44,85 @@ export class ListComponent implements OnInit {
   }
 
   async add(){
+    this.addOrEdit('New task', val => this.handleAddItem(val.task));
+  }
+
+  async edit(item){
+    this.addOrEdit('Edit task', val => this.handleEditItem(val.task, item), item);
+  }
+
+  async addOrEdit(header, handler, item?){
 
     const alert = await this.alertCtrl.create({
-      header: 'New task',
+      header,
       buttons: [
         {
         text: 'Cancel',
         role: 'cancel',
         handler: () => {
           console.log('Confirm Cancel');
-        }
-        },
-        {
-          text: 'Ok',
-          handler: async (val) => {
-            console.log('Confirm Ok');
-            let now = new Date();
-            let nowUtc = new Date(Date.UTC
-              (now.getUTCFullYear(),
-               now.getUTCMonth(), 
-               now.getUTCDate(), 
-               now.getUTCHours(),
-               now.getUTCMinutes(),
-               now.getUTCSeconds()));
-            this.db.collection(`users/${(await this.afAuth.currentUser).uid}/${this.name}`).add({
-              text: val.task,
-              pos: this.items.length ? this.items[0].pos + 1 : 0,
-              created: nowUtc,
-            });
           }
+        }, {
+          text: 'Ok',
+          handler,
         }
       ],
       inputs: [
         {
         name: 'task',
         type: 'text',
-        placeholder: 'My task'
+        placeholder: 'My task',
+        value: item ? item.text : '',
         },
     ]
     });
-    return await alert.present();
+
+    await alert.present();
+
+    alert.getElementsByTagName('input')[0].focus();
+
+    alert.addEventListener('keydown', (val =>{
+      if(val.keyCode === 13){
+        this.handleAddItem(val.srcElement['value']);
+        alert.dismiss();
+      }
+    }));
+  }
+
+  async handleAddItem(text: string){
+    if(!text.trim().length)
+      return;
+    console.log('Confirm Ok');
+      let now = new Date();
+      let nowUtc = new Date(Date.UTC
+        (now.getUTCFullYear(),
+         now.getUTCMonth(), 
+         now.getUTCDate(), 
+         now.getUTCHours(),
+         now.getUTCMinutes(),
+         now.getUTCSeconds()));
+      this.db.collection(`users/${(await this.afAuth.currentUser).uid}/${this.name}`).add({
+        text,
+        pos: this.items.length ? this.items[0].pos + 1 : 0,
+        created: nowUtc,
+      });
+
+      if (this.items.length >= MAX_LIST_SIZE){
+        this.alertCtrl.create({
+          header: 'Critical Overload',
+          subHeader: 'Too many tasks!',
+          message: `You have over ${MAX_LIST_SIZE} tasks in this list, showing only the top ${MAX_LIST_SIZE}.`,
+          buttons: ['Okay']
+        }).then(warning => {
+          warning.present();
+        })
+      }
+  }
+
+  async handleEditItem(text: string, item){
+    this.db.doc(`users/${(await this.afAuth.currentUser).uid}/${this.name}/${item.id}`).set({
+      text,
+    }, {merge: true});
   }
 
   task(item){
@@ -114,6 +156,15 @@ export class ListComponent implements OnInit {
     });
   }
   
+  async moveByOffset(index, offset){
+    this.db.doc(`users/${(await this.afAuth.currentUser).uid}/${this.name}/${this.items[index].id}`).set({
+      pos: this.items[index + offset].pos
+    }, {merge: true});
+
+    this.db.doc(`users/${(await this.afAuth.currentUser).uid}/${this.name}/${this.items[index + offset].id}`).set({
+      pos: this.items[index].pos
+    }, {merge: true});
+  }
 
 
 }

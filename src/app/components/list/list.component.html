@@ -1,9 +1,11 @@
 <ion-toolbar>
   <ion-title style="font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif; font-weight: bold;">
-    {{title}} <span>[{{items.length}}]</span>  
+    {{title}} <span *ngIf="!loading">[{{items.length}}]</span>  
   </ion-title>
   <ion-buttons slot="end">
-    <ion-button (click)="add()"><ion-icon name="add"></ion-icon></ion-button>
+    <ion-button shape="round" color="primary" (click)="add()">
+      <ion-icon name="add-circle"></ion-icon>
+    </ion-button>
   </ion-buttons>
 </ion-toolbar>
 
@@ -12,18 +14,29 @@
 
   <ion-spinner *ngIf="loading" color="primary"></ion-spinner>
 
-  <ion-item-sliding *ngFor = "let item of items">
+  <ion-item-sliding *ngFor = "let item of items, let i = index">
     <ion-item>
       <ion-label style="font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;">{{item.text}}</ion-label>
+      <ion-button shape="round" fill="clear" (click)="edit(item)">
+        <ion-icon color="primary" name="create" ></ion-icon>
+      </ion-button>
     </ion-item>
 
     <ion-item-options side="start" (ionSwipe)="complete(item)">
-      <ion-item-option color="success" (click)="complete(item)" *ngIf="allowDone" expandable>
+      <ion-item-option color="success" *ngIf="allowDone" [expandable]="allowDone" (click)="complete(item)">
         <ion-icon name="checkmark"></ion-icon>
       </ion-item-option>
     </ion-item-options>
 
     <ion-item-options side="end" (ionSwipe)="delete(item)">
+      <ion-item-option color="secondary" (click)="moveByOffset(i, -1)" *ngIf="i !== 0">
+        <ion-icon name="arrow-up"></ion-icon>
+      </ion-item-option>
+
+      <ion-item-option color="secondary" (click)="moveByOffset(i, 1)" *ngIf="i !== items.length - 1">
+        <ion-icon name="arrow-down"></ion-icon>
+      </ion-item-option>
+
       <ion-item-option color="primary" (click)="task(item)" *ngIf="allowTask">
         <ion-icon name="flash"></ion-icon>
       </ion-item-option>

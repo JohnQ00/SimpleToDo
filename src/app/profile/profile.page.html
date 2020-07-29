@@ -5,8 +5,19 @@
 </ion-header>
 
 <ion-content>
-  <h1>{{user.displayName}}</h1>
+  <div style="text-align: center;padding-top: 50px;">
+    <div style="padding-top: 10px;"><img src="{{user.photoURL}}" alt="profile-picture" ></div>
 
-  <ion-button color="warning" (click)="signOut()">Sign Out</ion-button>
+    <h4>Username:</h4>
+    <h5>{{user.displayName}}</h5>
+    <h4>E-mail:</h4>
+    <h5>{{user.email}}</h5>
+    </div>
+  
+
+  <div style="text-align: center;padding-top: 20%;">
+    <ion-button color="danger" (click)="signOut()">Sign Out</ion-button>
+  </div>
+  
 
 </ion-content>
