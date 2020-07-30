@@ -8,7 +8,7 @@ import { AngularFirestore } from '@angular/fire/firestore';
   styleUrls: ['./profile.page.scss'],
 })
 export class ProfilePage implements OnInit {
-  user = {};
+  user: any = {};
 
   constructor(private afAuth: AngularFireAuth, private db: AngularFirestore) { 
     this.afAuth.authState.subscribe(user => {

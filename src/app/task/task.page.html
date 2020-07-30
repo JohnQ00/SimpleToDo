@@ -1,5 +1,9 @@
+<ion-header>
+  <app-list-header [title]="'Critical'" [items]="myList.items" (add)="myList.add()" [loading]="myList.loading"></app-list-header>
+</ion-header>
+
 <ion-content>
-  <app-list [title]="'Task'" [name]="'task'" [allowDone]=true [allowLater]=true [allowTask]=false>
+  <app-list #myList [title]="'Task'" [name]="'task'" [allowDone]=true [allowLater]=true [allowTask]=false>
   </app-list>
 </ion-content>
 

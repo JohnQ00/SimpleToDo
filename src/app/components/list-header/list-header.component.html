@@ -1,0 +1,10 @@
+<ion-toolbar>
+  <ion-title style="font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif; font-weight: bold;">
+    {{title}} <span *ngIf="!loading">[{{items.length}}]</span>  
+  </ion-title>
+  <ion-buttons slot="end">
+    <ion-button shape="round" color="primary" icon-only (click)="add.emit()">
+      <ion-icon name="add-circle"></ion-icon>
+    </ion-button>
+  </ion-buttons>
+</ion-toolbar>
